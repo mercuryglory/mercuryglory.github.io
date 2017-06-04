@@ -68,6 +68,29 @@ jekyll构造的目录结构比较小巧，但也需要花点时间了解。
 
 打开三个文件，发现引用的都是同级目录下的default，再去看这个文件，内部代码如下:
 
+{% raw %}
+
+	<!DOCTYPE html>
+	<html lang="{{ page.lang | default: site.lang | default: "en" }}">
+	
+		{% include head.html %}
+	
+		<body>
+	
+			{% include header.html %}
+	
+			<main class="page-content" aria-label="Content">
+	      	<div class="wrapper">
+	        	{{ content }}
+	      	</div>
+			</main>
+	
+			{% include footer.html %}
+	
+		</body>
+	
+	</html>
+{% endraw %}
 
 可以看出，jekyll的结构除了采用html常用的模板方式，还有解耦的思想，将可以公用的部分完全提取出来。default定义页面的基本样式，其中的head.html、header.html、footer.html都存放在上级目录的_includes文件夹下，分别负责网页信息、网页头部、网页尾部。中间的 content 则由引用该模板的html文件填充。header.html和footer.html中的site.title和site.email存放在项目目录下的_config.yml配置文件中，site.pages则表示所有引用page作为模板的页面，也就是.md，比如about.md。md文档的存放目录，使用post.html作为模板。
 
@@ -79,6 +102,18 @@ default模板引用的是上级目录下的assets文件夹下的main.css。你�
 
 除了文章主体用markdown语法，在文章顶部还应添加引用的布局以及网页的标题，标准格式如下:
 
+    ---
+	layout: "要应用的模板布局"
+	title:  "标题（可以不同于文档名，会作为网页标题使用）"
+	date:   2017-05-31 15:49:52 +0800
+	categories: "所属目录，可不填"
+	---
+	正文
 
-## 存在的问题：
+# 注意！
+我在使用Jekyll搭建博客中遇到的一个坑。就是在markdown文档中插入上面提到的default.html代码的时候，一直报这个错：
+![使用Jekyll搭建自己的博客_8.png](http://om2doplmh.bkt.clouddn.com/使用Jekyll搭建自己的博客_8.png)
+检查后发现是Jekyll在解析markdown生成页面的时候，将作为代码引用的Liquid语句也解析了，自然在该项目的_includes文件夹下不会找到head.html这个文件了。我是通过这篇[博客](http://markzhang.cn/blog/2013/11/07/embed-liquid-codes-in-blog/)解决问题的，这里使用的方法是使用raw标签将代码包起来，不让jekyll将其当作liquid解析。markdown要真正使用jekyll生成网页，自然需要按照jekyll的语法糖来。
+
+# 存在的问题：
 文章的左右间距，过长的代码超出了背景的边界。默认的目录结构不够直观。
